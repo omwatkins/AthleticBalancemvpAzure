@@ -1,7 +1,7 @@
 import type React from "react"
 import "./globals.css"
 import Navigation from "@/components/navigation"
-import { Analytics } from "@vercel/analytics/react"
+
 import { Suspense } from "react"
 
 export const metadata = {
@@ -54,7 +54,7 @@ export default function RootLayout({
         <Suspense fallback={<div>Loading...</div>}>
           <Navigation />
           {children}
-          <Analytics />
+          
         </Suspense>
       </body>
     </html>
