@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/azure/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -50,28 +50,48 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            email,
+            password,
+            full_name: email.split('@')[0], // Use email prefix as default name
+          }),
         })
-        if (error) throw error
 
-        if (data.user && !data.user.email_confirmed_at) {
-          // User needs to confirm email
-          setError("Please check your email and click the confirmation link to complete registration.")
-        } else if (data.user) {
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to create account')
+        }
+
+        if (data.user) {
           router.push("/dashboard")
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+        const response = await fetch('/api/auth/signin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
         })
-        if (error) throw error
-        router.push("/dashboard")
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Invalid credentials')
+        }
+
+        if (data.user) {
+          router.push("/dashboard")
+        }
       }
     } catch (error: any) {
       setError(error.message)

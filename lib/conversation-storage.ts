@@ -1,5 +1,5 @@
 import type { Message } from "@/lib/types"
-import { createClient } from "@supabase/supabase-js"
+import { createClient } from "@/lib/azure/client"
 
 export interface Conversation {
   id: string
@@ -45,7 +45,7 @@ export function loadConversations(): Conversation[] {
 
 export async function saveConversationToDatabase(conversation: Conversation, coachId: string): Promise<void> {
   try {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+    const supabase = createClient()
 
     const {
       data: { user },
@@ -68,7 +68,7 @@ export async function saveConversationToDatabase(conversation: Conversation, coa
 
 export async function loadConversationsFromDatabase(): Promise<Conversation[]> {
   try {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+    const supabase = createClient()
 
     const {
       data: { user },

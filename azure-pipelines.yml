@@ -1,0 +1,71 @@
+# Azure DevOps Pipeline for Athletic Balance MVP
+trigger:
+- main
+
+variables:
+  azureSubscription: 'Azure Subscription Name'
+  resourceGroupName: 'athletic-balance-rg'
+  webAppName: 'athletic-balance-app'
+  dockerRegistry: 'your-registry.azurecr.io'
+  imageRepository: 'athletic-balance'
+  containerRegistry: 'your-registry'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install -g pnpm
+      displayName: 'Install pnpm'
+
+    - script: |
+        pnpm install
+      displayName: 'Install dependencies'
+
+    - script: |
+        pnpm run build
+      displayName: 'Build application'
+
+    - task: Docker@2
+      displayName: 'Build and push Docker image'
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistry)
+        tags: |
+          $(tag)
+          latest
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: 'production'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebAppContainer@1
+            displayName: 'Azure Web App on Container Deploy'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appName: $(webAppName)
+              containers: $(dockerRegistry)/$(imageRepository):$(tag)

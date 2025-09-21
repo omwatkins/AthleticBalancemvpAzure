@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/azure/server"
 import { COACHES } from "@/lib/coaches"
 import Link from "next/link"
 

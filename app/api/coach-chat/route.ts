@@ -1,8 +1,8 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient } from "@/lib/azure/server"
 import type { NextRequest } from "next/server"
 import { COACHES } from "@/lib/coaches"
 
-export const runtime = "edge"
+// export const runtime = "edge" // Disabled for Azure auth compatibility
 
 export async function POST(req: NextRequest) {
   try {

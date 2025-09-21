@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/azure/server"
 import { getCoachBySlug } from "@/lib/coaches"
 import { handleApiError, validateRequired, AppError } from "@/lib/error-handler"
 import {
